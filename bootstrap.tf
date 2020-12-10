@@ -5,7 +5,7 @@ provider "aws" {
 }
 
 resource "aws_key_pair" "ssh_key" {
-  key_name   = "aws-local-up-access-key"
+  key_name   = "${var.cluster}-access-key"
   public_key = file(var.public_key)
 }
 
@@ -71,26 +71,30 @@ resource "aws_internet_gateway" "gw" {
   }
 }
 
-resource "aws_iam_role_policy" "ec2_policy" {
-  name = "ec2_policy"
+resource "aws_iam_role_policy" "master" {
+  name = "${var.cluster}-master"
   role = aws_iam_role.ec2_role.id
 
   policy = file("cloud-local-up/master.json")
 }
 
 resource "aws_iam_role" "ec2_role" {
-  name = "ec2_role"
+  name = "${var.cluster}-ec2_role"
 
   assume_role_policy = file("cloud-local-up/iam_role.json")
+
+  tags = {
+    Name = var.cluster
+  }
 }
 
 resource "aws_iam_instance_profile" "bootstrap_profile" {
-  name = "bootstrap_profile"
+  name = "${var.cluster}-bootstrap_profile"
   role = aws_iam_role.ec2_role.name
 }
 
 resource "aws_iam_policy" "node" {
-  name        = "node"
+  name        = "${var.cluster}-node-policy"
   description = "Node IAM policy for cloud-provider"
 
   policy = file("cloud-local-up/node.json")
