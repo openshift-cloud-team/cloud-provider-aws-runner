@@ -103,7 +103,7 @@ resource "aws_instance" "host" {
   subnet_id = aws_subnet.public.id
   iam_instance_profile = aws_iam_instance_profile.bootstrap_profile.id
   associate_public_ip_address = true
-  user_data = format(file("cloud-local-up/user_data.sh"), var.AWS_ACCESS_KEY_ID, var.AWS_SECRET_ACCESS_KEY,  var.AWS_REGION, var.cluster_cidr, aws_iam_policy.node.arn)
+  user_data = format(file("cloud-local-up/user_data.sh"), var.AWS_ACCESS_KEY_ID, var.AWS_SECRET_ACCESS_KEY,  var.AWS_REGION, var.private_cidr, aws_iam_policy.node.arn)
 
   tags = {
     "kubernetes.io/cluster/${var.cluster}"  = "owned"
@@ -128,24 +128,6 @@ resource "aws_instance" "host" {
   }
 }
 
-resource "aws_eip" "gw" {
-  vpc      = true
-  depends_on = [aws_internet_gateway.gw]
-
-  tags = {
-    Name = var.cluster
-  }
-}
-
-resource "aws_nat_gateway" "gw" {
-  subnet_id     = aws_subnet.public.id
-  allocation_id = aws_eip.gw.id
-
-  tags = {
-    Name =  "${var.cluster}-NAT"
-  }
-}
-
 resource "aws_route_table_association" "public" {
   subnet_id      = aws_subnet.public.id
   route_table_id = aws_vpc.cluster_vpc.main_route_table_id
@@ -158,7 +140,7 @@ resource "aws_route" "default_route" {
 }
 
 output "ssh_access" {
-  value = aws_eip.gw.public_ip
-  depends_on = [aws_eip.gw]
+  value = aws_instance.host.public_ip
+  depends_on = [aws_instance.host]
   description = "The public IP address of the EC2 instance. To connect use `$ ssh fedora@<output-ip-addr> -i <your_private_key>`"
 }
