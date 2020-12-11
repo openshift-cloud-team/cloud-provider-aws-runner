@@ -1,9 +1,11 @@
 {
-  "AWS_REGION": "eu-central-1",
   "cluster": "aws-local-up-cluster",
   "cluster_cidr": "192.168.0.0/16",
   "public_cidr": "192.168.1.0/24",
   "private_cidr": "192.168.2.0/24",
   "private_key": "~/.ssh/id_rsa",
-  "public_key": "~/.ssh/id_rsa.pub"
+  "public_key": "~/.ssh/id_rsa.pub",
+  "ami": "ami-07533cd77d753da7b",
+  "instance_type": "m4.large",
+  "AWS_REGION": "eu-central-1"
 }

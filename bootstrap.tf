@@ -102,8 +102,8 @@ resource "aws_iam_policy" "node" {
 
 resource "aws_instance" "host" {
   key_name      = aws_key_pair.ssh_key.key_name
-  ami           = "ami-07533cd77d753da7b"
-  instance_type = "m5.large"
+  ami           = var.ami
+  instance_type = var.instance_type
   subnet_id = aws_subnet.public.id
   iam_instance_profile = aws_iam_instance_profile.bootstrap_profile.id
   associate_public_ip_address = true
@@ -144,7 +144,7 @@ resource "aws_route" "default_route" {
 }
 
 output "ssh_access" {
-  value = aws_instance.host.public_ip
+  value = "ssh fedora@${aws_instance.host.public_ip} -i ${var.private_key}"
   depends_on = [aws_instance.host]
   description = "The public IP address of the EC2 instance. To connect use `$ ssh fedora@<output-ip-addr> -i <your_private_key>`"
 }
